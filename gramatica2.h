@@ -65,9 +65,9 @@
 		 			//printf("%c(%c)",this->_letras[i]._letra,(this->_letras[i]._vocal?'v':'c'));
 	 			}
 	 			this->_letras.insert(this->_letras.begin(),Letra(' '));//un caracter comodín
-	 			this->_letras.push_back(Letra(' '));//un caracter comodín
+	 			//this->_letras.push_back(Letra(' '));//un caracter comodín
 	 			this->_letras[0]._nulo=true;
-	 			this->_letras[this->_letras.size()-1]._nulo=true;
+	 			//this->_letras[this->_letras.size()-1]._nulo=true;
  		}
 
  		void dividir(){
@@ -92,9 +92,6 @@
  			return ;
  		}*/
 
- 		void imprimirSilaba(){ 			
- 		}
-
  		// restricciones (recorrido voraz)
  		void restMonosilabo(){ 			
  			//una sola sílaba (no se pueden dividir)
@@ -111,27 +108,41 @@
  		} 	
  		void restConsonante(){
  			//Una consonante entre dos vocales se agrupa con la vocal de la derecha 	
- 			//printf("%c\n",this->_letras[0]._letra);			
+			bool cumple=false; 			
  			for(int i=2;i<this->_letras.size();i++)
 				if(
 					!this->_letras[i-2]._revisado and !this->_letras[i-1]._revisado and !this->_letras[i]._revisado and
 					!this->_letras[i-2]._vocal and this->_letras[i-1]._vocal and !this->_letras[i]._vocal
-				 )
+				  )
 				 { 
-					printf("%c%c-%c ",this->_letras[i-2]._letra,this->_letras[i-1]._letra,this->_letras[i]._letra);
-					this->_letras[i-2]._revisado=this->_letras[i-1]._revisado=true;//this->_letras[i]._revisado=true;
+					//printf("-%c%c-%c ",this->_letras[i-2]._letra,this->_letras[i-1]._letra,this->_letras[i]._letra);
+					this->_letras[i-2]._revisado=this->_letras[i-1]._revisado=true;
 					this->_letras.insert(this->_letras.begin()+i-2,Letra('-',true));
-					this->_letras.insert(this->_letras.begin()+i+1,Letra('-',true));
+					if(i<this->_letras.size()-2)
+						this->_letras.insert(this->_letras.begin()+i+1,Letra('-',true));
+					cumple=true;
 				 }
+				 else if(
+					 	!this->_letras[i-1]._revisado and !this->_letras[i]._revisado and
+						!this->_letras[i-1]._vocal and this->_letras[i]._vocal
+				 	    )
+				 {
+				 	//-%c%c 
+			 		this->_letras[i-1]._revisado=this->_letras[i]._revisado=true;
+					this->_letras.insert(this->_letras.begin()+i-1,Letra('-',true));
 					
-		//	//printf("\nhay %d silabas\n",k);
-			//puts("");
+					cumple=true;
+
+				 }
+			if(cumple)
+			 puts("->cons");
  		}
  		void rest2RLConsonante(){
  			//Si la segunda consonante es r o l, las dos consonantes se agrupan con la segunda vocal			
+ 			bool cumple=false;
  			for(int i=2;i<this->_letras.size();i++)
 				if(
-					!this->_letras[i-2]._revisado and !this->_letras[i-1]._revisado and !this->_letras[i]._revisado
+				!this->_letras[i-2]._revisado and !this->_letras[i-1]._revisado and !this->_letras[i]._revisado and !this->_letras[i-2]._nulo 
 				)
 				{	
 					
@@ -140,17 +151,19 @@
 							//printf("%c%c%c-",this->_letras[i-2]._letra,this->_letras[i-1]._letra,this->_letras[i]._letra);						
 							this->_letras[i-2]._revisado=this->_letras[i-1]._revisado=this->_letras[i]._revisado=true;
 							this->_letras.insert(this->_letras.begin()+i-2,Letra('-',true));
-							
+						cumple=true;					
 				  		}
-				    else if(!this->_letras[i-2]._nulo and !this->_letras[i-2]._vocal and !this->_letras[i-1]._vocal)//excepción
+				    else if(!this->_letras[i-2]._vocal and !this->_letras[i-1]._vocal)//excepción
 						{
 							//printf("%c-%c%c",this->_letras[i-2]._letra,this->_letras[i-1]._letra,this->_letras[i]._letra);						
 							this->_letras[i-2]._revisado=this->_letras[i-1]._revisado=this->_letras[i]._revisado=true;
 							this->_letras.insert(this->_letras.begin()+i-1,Letra('-',true));
-							
+						cumple=true;
 						}					
 					
 				}
+		if(cumple)
+			 puts("->LR");
  		}
  		void rest3Consonante(){
 			/* Cuando hay TRES consonantes ENTRE VOCALES, las primeras 
@@ -158,16 +171,17 @@
 
 			/*Excepción: Si la tercera consonante es r o l, la primera consonante 
 			se une con la primera vocal y las otras dos con la siguiente. */
- 			int k=0;
+ 			bool cumple=false;
  			if(this->_letras.size()>5)
 	 			for(int i=4;i<this->_letras.size();i++)
 					if(
 						!this->_letras[i-4]._revisado and !this->_letras[i-3]._revisado and !this->_letras[i-2]._revisado and !this->_letras[i-1]._revisado and !this->_letras[i]._revisado and
 						this->_letras[i-4]._vocal and !this->_letras[i-3]._vocal and !this->_letras[i-2]._vocal and (!this->_letras[i-1]._vocal and !this->_letras[i-1]._lr) and this->_letras[i]._vocal)
 					{
-						//printf("%c%c%c-%c%c-",this->_letras[i-4]._letra,this->_letras[i-3]._letra,this->_letras[i-2]._letra,this->_letras[i-1]._letra,this->_letras[i]._letra);
-						this->_letras[i-4]._revisado=this->_letras[i-3]._revisado=this->_letras[i-2]._revisado=this->_letras[i-1]._revisado=this->_letras[i]._revisado=true;
-						this->_letras.insert(this->_letras.begin()+i-1,Letra('-',true));
+							//printf("%c%c%c-%c%c-",this->_letras[i-4]._letra,this->_letras[i-3]._letra,this->_letras[i-2]._letra,this->_letras[i-1]._letra,this->_letras[i]._letra);
+							this->_letras[i-4]._revisado=this->_letras[i-3]._revisado=this->_letras[i-2]._revisado=this->_letras[i-1]._revisado=this->_letras[i]._revisado=true;
+							this->_letras.insert(this->_letras.begin()+i-1,Letra('-',true));
+							cumple=true;						
 					}
 					else //excepción
 						if(
@@ -176,16 +190,18 @@
 							//printf("%c%c-%c%c%c-",this->_letras[i-4]._letra,this->_letras[i-3]._letra,this->_letras[i-2]._letra,this->_letras[i-1]._letra,this->_letras[i]._letra);
 							this->_letras[i-4]._revisado=this->_letras[i-3]._revisado=this->_letras[i-2]._revisado=this->_letras[i-1]._revisado=this->_letras[i]._revisado=true;
 							this->_letras.insert(this->_letras.begin()+i-2,Letra('-',true));
+							cumple=true;
 						}
 
 
-			//puts("");
+			if(cumple)
+			 puts("->3cons");
  		}
 
  		void rest4Consonante(){
  			/*Cuando hay cuatro consonantes ENTRE VOCALES, las primeras dos se unen 
 			 a la primera vocal y las otras dos se unen a la segunda vocal.*/
- 			int k=0;
+ 			bool cumple=false;
  			if(this->_letras.size()>6)
 	 			for(int i=5;i<this->_letras.size();i++)
 					if(
@@ -205,14 +221,18 @@
 							 					this->_letras[i]._letra);*/
 						this->_letras[i-5]._revisado=this->_letras[i-4]._revisado=this->_letras[i-3]._revisado=this->_letras[i-2]._revisado=this->_letras[i-1]._revisado=this->_letras[i]._revisado=true;
 						this->_letras.insert(this->_letras.begin()+i-2,Letra('-',true));
+						cumple=true;
 						
 				}
-			//		puts("");
+			
+			if(cumple)
+			 puts("->4cons");
  		}
  		void restDobleFusion(){//no sirve
  			/*Recuerda que las consonantes dobles: ch, ll, rr representan un solo fonema, 
  			por lo que para efectos de la división silábica 
  			cuentan como una sola consonante (no se separan). Se aplica entonces la regla*/
+ 			bool cumple=false;
  			for(int i=2;i<this->_letras.size();i++)
 					if(
 						!this->_letras[i-2]._revisado and !this->_letras[i-1]._revisado and !this->_letras[i]._revisado and
@@ -226,13 +246,18 @@
 							this->_letras[i-2]._revisado=this->_letras[i-1]._revisado=this->_letras[i]._revisado=true;
 							//this->_letras.insert(this->_letras.begin()+i+1,Letra('-',true));
 							this->_letras.insert(this->_letras.begin()+i-2,Letra('-',true));
+							cumple=true;							
 						}
+
+		if(cumple)
+			 puts("->2f");
 					
  		}
  		//Los diptongos y los triptongos forman una sola sílaba, por lo que no podemos separarlos. 
  		void restDiptongo(){
  			/*Llamamos diptongo a la unión de una vocal fuerte (a, e, o) y
  			 una vocal débil (i, u) o la unión de dos vocales débiles.(i, u)*/
+ 			bool cumple=false;
 	 			for(int i=2;i<this->_letras.size();i++)								//débil o fuerte	
 	 				if (
 	 					!this->_letras[i-2]._revisado and !this->_letras[i-1]._revisado and !this->_letras[i]._revisado and
@@ -241,26 +266,30 @@
 			 			//printf("%c%c%c-",this->_letras[i-2]._letra,this->_letras[i-1]._letra,this->_letras[i]._letra);			 			
 						this->_letras[i-2]._revisado=this->_letras[i-1]._revisado=this->_letras[i]._revisado=true;
 						this->_letras.insert(this->_letras.begin()+i-2,Letra('-',true));
-						
+						cumple=true;						
 			 		}
-			 		//puts("");
+		if(cumple)
+			 puts("->dipt");
  		}
  		//triptongo
- 		void restTriptongo(){ 				
+ 		void restTriptongo(){ 
+ 		bool cumple=false;				
  				for(int i=2;i<this->_letras.size();i++)
  					if (!this->_letras[i-2]._revisado and !this->_letras[i-1]._revisado and !this->_letras[i]._revisado
  					 and this->_letras[i-2]._debil and (this->_letras[i-1]._vocal and !this->_letras[i-1]._debil) and this->_letras[i]._debil){
  						//printf("%c%c%c-",this->_letras[i-2]._letra,this->_letras[i-1]._letra,this->_letras[i]._letra);
  						this->_letras[i-2]._revisado=this->_letras[i-1]._revisado=this->_letras[i]._revisado=true;
 						this->_letras.insert(this->_letras.begin()+i-2,Letra('-',true));
+						cumple=true;
  					}
-
-				//puts("");
+		if(cumple)
+			 puts("->trip");
  		}
  		//hiato
  		void respHiato(){
  			/*DOS VOCALES FUERTES (a, e, o) requieren que se agrupen 
  			en sílabas diferentes. A este procedimiento le llamamos hiato.*/
+ 			bool cumple=false;
  			for(int i=1;i<this->_letras.size();i++)
  				if (
  					!this->_letras[i-1]._revisado and !this->_letras[i]._revisado and
@@ -270,17 +299,15 @@
  				//	printf("%c-%c-",this->_letras[i-1]._letra,this->_letras[i]._letra);
  					this->_letras[i-1]._revisado=this->_letras[i]._revisado=true;
 					this->_letras.insert(this->_letras.begin()+i,Letra('-',true));
+					cumple=true;
 				}
- 				//puts("");
+ 		if(cumple)
+			 puts("->hiato");
  		}
  		void imprimir(){
- 			
+ 			bool cumple=false;
 			for(int i=1;i<this->_letras.size();i++)
 				printf("%c",this->_letras[i]._letra);
-
-
-				 /*if(this->_letras[i]._letra!='-')		
-					printf("%c",(this->_letras[i]._vocal?'v':'c'));*/
  		}
  		//
  };

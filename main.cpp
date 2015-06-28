@@ -20,6 +20,7 @@ int main(){
 	a.restDobleFusion();
 	a.rest2RLConsonante();
 	a.restConsonante();
+
 	
 	
 
