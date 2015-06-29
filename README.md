@@ -6,3 +6,5 @@
 <br/>-se imprimen las restricciones cumplidas por la palabra.
 <br/>Version 1.2, cambios:
 <br/>-en la restricción, "restDobleFusion", mejora esta para que solo valide a conjunto de letras válidas por la gramática española: ch,ll,rr.
+<br/>Version 1.3, cambios:
+<br/>-Acepte caracteres propios del idioma español.
