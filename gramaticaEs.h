@@ -47,9 +47,8 @@
  };
  class Palabra{
  	private:
- 		wchar_t _palabra[200];
- 		//wchar_t _vocalesDebiles[2]=L"iu",_vocalesFuertes[3]=L"aeo",_lr[2]=L"lr";
- 		wchar_t _vocalesDebiles[3],_vocalesFuertes[4],_lr[3];
+ 		wchar_t _palabra[200]; 		
+ 		wchar_t _vocalesDebiles[3+1],_vocalesFuertes[4+5],_lr[3];
  		std::vector<Letra> _letras; 		
 	public:
 
@@ -62,12 +61,9 @@
  			this->init();
  			mbstowcs(this->_palabra,p, 100);
  		}
- 		void init(){
- 			/*this->_vocalesDebiles=L"iu";
- 			this->_vocalesFuertes=L"aeo";
- 			this->_lr=L"lr";*/
- 			mbstowcs(this->_vocalesDebiles,"iu", 10);
-			mbstowcs(this->_vocalesFuertes,"aeo", 10);
+ 		void init(){ 			
+ 			mbstowcs(this->_vocalesDebiles,"iuü", 10);
+			mbstowcs(this->_vocalesFuertes,"aeoáéíóú", 10);
 			mbstowcs(this->_lr,"lr", 10);
  		}
  		void print(){
@@ -323,7 +319,10 @@
  		//hiato
  		void respHiato(){
  			/*DOS VOCALES FUERTES (a, e, o) requieren que se agrupen 
- 			en sílabas diferentes. A este procedimiento le llamamos hiato.*/
+ 			en sílabas diferentes. A este procedimiento le llamamos hiato.
+			í y ú serán tomadas como vocales fuertes
+ 			*/
+
  			bool cumple=false;
  			for(int i=1;i<this->_letras.size();i++)
  				if (
@@ -332,7 +331,7 @@
  					!this->_letras[i-1]._debil and !this->_letras[i]._debil)
  				{
  				//	printf("%c-%c-",this->_letras[i-1]._letra,this->_letras[i]._letra);
- 					this->_letras[i-1]._revisado=this->_letras[i]._revisado=true;
+ 					//this->_letras[i-1]._revisado=this->_letras[i]._revisado=true;
 					this->_letras.insert(this->_letras.begin()+i,Letra('-',true));
 					cumple=true;
 				}
