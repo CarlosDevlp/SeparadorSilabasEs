@@ -238,7 +238,9 @@
 						!this->_letras[i-2]._revisado and !this->_letras[i-1]._revisado and !this->_letras[i]._revisado and
 						(
 							(this->_letras[i-2]._letra=='c' and this->_letras[i-1]._letra=='h') or
-						     this->_letras[i-2]._letra==this->_letras[i-1]._letra 
+						    (this->_letras[i-2]._letra=='r' and this->_letras[i-1]._letra=='r') or 
+						    (this->_letras[i-2]._letra=='l' and this->_letras[i-1]._letra=='l')
+						     //this->_letras[i-2]._letra==this->_letras[i-1]._letra 
 					    )
 					   and this->_letras[i]._vocal
 						){
@@ -264,7 +266,7 @@
 	 					!this->_letras[i-2]._vocal and this->_letras[i-1]._debil and this->_letras[i]._vocal)
 	 				{
 			 			//printf("%c%c%c-",this->_letras[i-2]._letra,this->_letras[i-1]._letra,this->_letras[i]._letra);			 			
-						this->_letras[i-2]._revisado=this->_letras[i-1]._revisado=this->_letras[i]._revisado=true;
+						this->_letras[i-1]._revisado=this->_letras[i]._revisado=true;
 						this->_letras.insert(this->_letras.begin()+i-2,Letra('-',true));
 						cumple=true;						
 			 		}

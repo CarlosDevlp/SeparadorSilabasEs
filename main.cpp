@@ -14,10 +14,11 @@ int main(){
 	a.respHiato();
 	a.restMonosilabo();//si cumple la restricción se termina el programa
 	a.rest4Consonante();
+	a.restDobleFusion();
 	a.restDiptongo();	
 	a.rest3Consonante();
 	a.restTriptongo();
-	a.restDobleFusion();
+	
 	a.rest2RLConsonante();
 	a.restConsonante();
 
