@@ -1,114 +1,130 @@
-#ifndef GRAMATICA
- #define GRAMATICA 
+//Libreria de gramática española 
+//desarrollador: carlos chavez laguna.
+#ifndef GRAMATICA_ES
+ #define GRAMATICA_ES
  #include <string>
  #include <string.h>
  #include <wchar.h>
  #include <vector>
+ #include <wchar.h>
  #include <stdio.h>
  #include <stdlib.h>
- 	char * strlwr(char * s){
-	        char *t = s;	
-	        if (!s)	        
-                return 0;	        	
-	        int i = 0;
-	        while ( *t != '\0' )
-	        {
-                if (*t >= 'A' && *t <= 'Z' )	                
-		                	*t = *t + ('a' - 'A');
-	                
-	           t++;
-	        }
-	 
-        return s;
-	}
+ #include <iostream>
 
- //
  class Letra{
  	public:
- 		char _letra;
- 		bool _vocal=false,_debil=false,_lr=false,_revisado=false,_nulo=false;
-
-		Letra(){			
+ 		wchar_t _letra;
+ 		bool _vocal,_debil,_lr,_revisado,_nulo;
+ 	
+		Letra(){	
+			init();
 		}
-		Letra(char _l,bool _r):_letra(_l),_revisado(_r){
+		Letra(wchar_t _l,bool _r):_letra(_l),_revisado(_r){
+			init();
 		} 			
-		Letra(char _l):_letra(_l){			
-		} 			
-		Letra(char _l,bool _v,bool _LR):_letra(_l),_vocal(_v),_lr(_LR){
-
+		/*Letra(char _l){
+			mbstowcs(this->_letra,_l , 1);
+			wcsncpy ( this->_letra, _l, 1);
+			init();
+		} */
+		
+		Letra(wchar_t _l){			
+			this->_letra=_l;
+			init();
+		} 
+		/*
+			Letra(wchar_t _l):_letra(_l){
+				init();
+			} 
+		*/			
+		Letra(wchar_t _l,bool _v,bool _LR):_letra(_l),_vocal(_v),_lr(_LR){
+			init();
 		}
-
+		void init(){
+			_vocal=_debil=_lr=_revisado=_nulo=false;
+		}
 
  };
  class Palabra{
  	private:
- 		std::string _palabra;
- 		std::vector<std::string> _silaba;
- 		std::string _vocalesDebiles="iu",_vocalesFuertes="aeo",_lr="lr";
- 		std::vector<Letra> _letras;
- 		int _acento;
+ 		wchar_t _palabra[200];
+ 		//wchar_t _vocalesDebiles[2]=L"iu",_vocalesFuertes[3]=L"aeo",_lr[2]=L"lr";
+ 		wchar_t _vocalesDebiles[3],_vocalesFuertes[4],_lr[3];
+ 		std::vector<Letra> _letras; 		
 	public:
-	
+
+		Palabra(){			
+			this->init();
+			mbstowcs(this->_palabra," ", 100);
+		}
+
+ 		Palabra(char p[]){
+ 			this->init();
+ 			mbstowcs(this->_palabra,p, 100);
+ 		}
+ 		void init(){
+ 			/*this->_vocalesDebiles=L"iu";
+ 			this->_vocalesFuertes=L"aeo";
+ 			this->_lr=L"lr";*/
+ 			mbstowcs(this->_vocalesDebiles,"iu", 10);
+			mbstowcs(this->_vocalesFuertes,"aeo", 10);
+			mbstowcs(this->_lr,"lr", 10);
+ 		}
+ 		void print(){
+
+ 			for(int i=0;i<wcslen(_palabra);i++)
+			//	wprintf(L"%lc",_palabra[i]);
+ 				this->_letras.push_back(Letra(_palabra[i]));
+
+
+ 		}
  		void separar(){ 			
- 			    
-	 			for(int i=0;i<_palabra.length();i++){	 				
+ 			    int size=wcslen(_palabra),
+ 			    	vF=wcslen(_vocalesFuertes),
+ 			    	vD=wcslen(_vocalesDebiles),
+ 			    	lR=wcslen(_lr);
+
+	 			for(int i=0;i<size;i++){		
 	 				this->_letras.push_back(Letra(_palabra[i]));
 	 				//ver si es vocal
 		 				//fuerte		 				
-		 				for(int ii=0;ii<_vocalesFuertes.length();ii++)
+		 				for(int ii=0;ii<vF;ii++)
 			 				if(_palabra[i]==_vocalesFuertes[ii]){//es vocal
-			 						this->_letras[i]._vocal=true;
+			 						this->_letras[i]._vocal=true;			 					
 			 					break;
 			 				}
 						//debil
-		 				for(int ii=0;ii<_vocalesDebiles.length();ii++)
+		 				for(int ii=0;ii<vD;ii++)
 			 				if(_palabra[i]==_vocalesDebiles[ii]){//es vocal
 			 						this->_letras[i]._vocal=true;
-			 						this->_letras[i]._debil=true;
+			 						this->_letras[i]._debil=true;			 						
 			 					break;
 			 				}
 			 		  //Y como débil
-			 			if(_palabra[i]=='y')
+			 			if(_palabra[i]==L'y')
 			 				this->_letras[i]._debil=true;
 
 			 				
 		 			//ver si es lr
 			 		if(!this->_letras[i]._vocal)
-			 			for(int ii=0;ii<_lr.length();ii++)
+			 			for(int ii=0;ii<lR;ii++)
 			 				if( _palabra[i]==_lr[ii]){//es lr
 			 						this->_letras[i]._lr=true;
 			 					break;
 			 				}
 		 			//printf("%c(%c)",this->_letras[i]._letra,(this->_letras[i]._vocal?'v':'c'));
 	 			}
-	 			this->_letras.insert(this->_letras.begin(),Letra(' '));//un caracter comodín
+	 			this->_letras.insert(this->_letras.begin(),Letra(L' '));//un caracter comodín
 	 			//this->_letras.push_back(Letra(' '));//un caracter comodín
 	 			this->_letras[0]._nulo=true;
 	 			//this->_letras[this->_letras.size()-1]._nulo=true;
  		}
-
- 		void dividir(){
- 			int from;
- 			bool separar;
- 			 for(int i=0;i<_palabra.length();i++)
-	 			 		printf(" %c ",_palabra[i]);
- 			
-
+ 		
+ 		void setPalabra(char  *p){
+ 			mbstowcs(this->_palabra,p , 100);
  		}
- 		void setPalabra(std::string p){
- 			_palabra=p;			
- 		}
- 		Palabra(){}
-
- 		Palabra(std::string p,int ac){
- 			_palabra=p;
- 			_acento=ac;
- 		}
-
- 		/*vector<string> getSilaba(){
- 			return ;
- 		}*/
-
+ 		
+ 		
  		// restricciones (recorrido voraz)
  		void restMonosilabo(){ 			
  			//una sola sílaba (no se pueden dividir)
@@ -152,7 +168,7 @@
 
 				 }
 			if(cumple)
-			 puts("->cons");
+			 std::wcout<<"->cons"<<std::endl;
  		}
  		void rest2RLConsonante(){
  			//Si la segunda consonante es r o l, las dos consonantes se agrupan con la segunda vocal			
@@ -180,7 +196,7 @@
 					
 				}
 		if(cumple)
-			 puts("->LR");
+			 std::wcout<<"->LR"<<std::endl;
  		}
  		void rest3Consonante(){
 			/* Cuando hay TRES consonantes ENTRE VOCALES, las primeras 
@@ -212,7 +228,7 @@
 
 
 			if(cumple)
-			 puts("->3cons");
+			 std::wcout<<"->3cons"<<std::endl;
  		}
 
  		void rest4Consonante(){
@@ -243,7 +259,7 @@
 				}
 			
 			if(cumple)
-			 puts("->4cons");
+			 std::wcout<<"->4cons"<<std::endl;
  		}
  		void restDobleFusion(){//no sirve
  			/*Recuerda que las consonantes dobles: ch, ll, rr representan un solo fonema, 
@@ -254,9 +270,9 @@
 					if(
 						!this->_letras[i-2]._revisado and !this->_letras[i-1]._revisado and !this->_letras[i]._revisado and
 						(
-							(this->_letras[i-2]._letra=='c' and this->_letras[i-1]._letra=='h') or
-						    (this->_letras[i-2]._letra=='r' and this->_letras[i-1]._letra=='r') or 
-						    (this->_letras[i-2]._letra=='l' and this->_letras[i-1]._letra=='l')
+							(this->_letras[i-2]._letra==L'c' and this->_letras[i-1]._letra==L'h') or
+						    (this->_letras[i-2]._letra==L'r' and this->_letras[i-1]._letra==L'r') or 
+						    (this->_letras[i-2]._letra==L'l' and this->_letras[i-1]._letra==L'l')
 						     //this->_letras[i-2]._letra==this->_letras[i-1]._letra 
 					    )
 					   and this->_letras[i]._vocal
@@ -269,7 +285,7 @@
 						}
 
 		if(cumple)
-			 puts("->2f");
+			 std::wcout<<"->2f"<<std::endl;
 					
  		}
  		//Los diptongos y los triptongos forman una sola sílaba, por lo que no podemos separarlos. 
@@ -288,7 +304,7 @@
 						cumple=true;						
 			 		}
 		if(cumple)
-			 puts("->dipt");
+			 std::wcout<<"->dipt"<<std::endl;
  		}
  		//triptongo
  		void restTriptongo(){ 
@@ -302,7 +318,7 @@
 						cumple=true;
  					}
 		if(cumple)
-			 puts("->trip");
+			 std::wcout<<"->trip"<<std::endl;
  		}
  		//hiato
  		void respHiato(){
@@ -321,13 +337,25 @@
 					cumple=true;
 				}
  		if(cumple)
-			 puts("->hiato");
+			 std::wcout<<"->hiato"<<std::endl;
  		}
  		void imprimir(){
- 			bool cumple=false;
-			for(int i=1;i<this->_letras.size();i++)
-				printf("%c",this->_letras[i]._letra);
+
+ 			for(int i=1;i<this->_letras.size();i++)
+				wprintf(L"%lc",this->_letras[i]._letra);
+			//	wprintf(L"%lc",(this->_letras[i]._vocal?L'v':L'c'));
+
+
  		}
  		//
  };
+
+
+//sobrecargando operadores
+/*void operator>>(Palabra &a,wchar_t str[]){
+		//Palabra x;
+		std::wcin>>str;
+		a.setPalabra(str);
+}*/
+
 #endif

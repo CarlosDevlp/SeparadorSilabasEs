@@ -1,14 +1,18 @@
 //PROGRAMA PRINCIPAL
-#include "gramatica2.h"
-#include <iostream>
+#include "gramaticaEs.h"
 using namespace std;
-int main(){
-	string str;
-	//scanf("%s",&str);
-	cin >> str;
-	Palabra a(str,0);
-	a.separar();
 
+int main(){
+	setlocale(LC_ALL, "");	
+	char str[100];
+	cin>>str;
+	Palabra a(str);
+	//a.setPalabra(str);
+
+	a.separar();
+	
+	//wcout<<endl<<"in the end"<<endl;
+	
 	
 	//restricciones
 	a.respHiato();
@@ -17,16 +21,15 @@ int main(){
 	a.restDobleFusion();
 	a.restDiptongo();	
 	a.rest3Consonante();
-	a.restTriptongo();
-	
+	a.restTriptongo();	
 	a.rest2RLConsonante();
 	a.restConsonante();
-
 	
 	
 
+	/*
 	//1er grupo no óptimo
-	/*a.restConsonante();
+	a.restConsonante();
 	a.rest2RLConsonante();
 	a.rest3Consonante();
 	a.rest4Consonante();
@@ -43,10 +46,8 @@ int main(){
 	a.rest4Consonante();
 	a.rest3Consonante();
 	a.rest2RLConsonante();
-	a.restConsonante();*/
-	
-	puts("");	
+	a.restConsonante();*/	
 	a.imprimir();
-	puts("");
+	wcout<<endl;
 	return 0;
 }
