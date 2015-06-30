@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # SeparadorSilabas
 <br/>Primer algoritmo de silabeo tipo ávido (algoritmo Voraz)
 <br/>Version 1.1, cambios:
@@ -8,3 +9,7 @@
 <br/>-en la restricción, "restDobleFusion", mejora esta para que solo valide a conjunto de letras válidas por la gramática española: ch,ll,rr.
 <br/>Version 1.3, cambios:
 <br/>-Acepte caracteres propios del idioma español.
+=======
+# SeparadorSilabasEs
+Separador de palabras en sílabas
+>>>>>>> 1255bb769bd93c2c497db1cfd5d38331ef78ce56
