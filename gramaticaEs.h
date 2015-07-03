@@ -14,7 +14,7 @@
  class Letra{
  	public:
  		wchar_t _letra;
- 		bool _vocal,_debil,_lr,_revisado,_nulo;
+ 		bool _vocal,_debil,_lr,_revisado,_nulo,_h;
  	
 		Letra(){	
 			init();
@@ -30,7 +30,7 @@
 			init();
 		}
 		void init(){
-			_vocal=_debil=_lr=_revisado=_nulo=false;
+			_vocal=_debil=_lr=_revisado=_nulo=_h=false;
 		}
 
  };
@@ -39,7 +39,31 @@
  	private:
  		wchar_t _palabra[300];
  		wchar_t _vocalesDebiles[3+1],_vocalesFuertes[4+5],_lr[3];
- 		std::vector<Letra> _letras; 		
+ 		std::vector<Letra> _letras;
+ 		typedef void (Palabra::*Rest)(void) ; 	
+ 		std::vector<Rest> _restricciones;
+ 		int _noRevisados,_LRs,_DF;//contador de caracteres que podrían cumplir restricciones
+ 		bool _cumpleRest[9],_esMonosiliba;//predecir si la palabra cumpliría o no la restricción
+ 		//grupo de instrucciones inicializadoras para el constructor
+ 		void init(){
+ 			//inicializar algunas variables
+ 			this->_esMonosiliba=false;
+ 			//inicializar el puntero a las restricciones 			
+			this->_restricciones.push_back(&Palabra::restHiato);
+			this->_restricciones.push_back(&Palabra::restMonosilabo);
+			this->_restricciones.push_back(&Palabra::rest4Consonante);
+			this->_restricciones.push_back(&Palabra::restDobleFusion);
+			this->_restricciones.push_back(&Palabra::restDiptongo);
+			this->_restricciones.push_back(&Palabra::rest3Consonante);
+			this->_restricciones.push_back(&Palabra::restTriptongo);
+			this->_restricciones.push_back(&Palabra::rest2RLConsonante);
+			this->_restricciones.push_back(&Palabra::restConsonante); 	
+
+ 			//iniciarlizar las vocales
+ 			mbstowcs(this->_vocalesDebiles,"iuü", 10);
+			mbstowcs(this->_vocalesFuertes,"aeoáéíóú", 10);
+			mbstowcs(this->_lr,"lr", 10);
+ 		}
  		// restricciones
  		void restMonosilabo(){ 			
  			//una sola sílaba (no se pueden dividir)
@@ -50,8 +74,9 @@
 
  			if(k==1){
  				//si la palabra es monosílaba no es necesario seguir evaluando el resto de las restricciones
- 				printf("\nla palabra es monosilaba\n");
- 				exit(0);
+ 				//printf("\nla palabra es monosilaba\n");
+ 				//exit(0);
+ 				this->_esMonosiliba=true;
  			}
  		} 	
  		void restConsonante(){
@@ -82,8 +107,8 @@
 					cumple=true;
 
 				 }
-			if(cumple)
-			 std::wcout<<"->cons"<<std::endl;
+			//if(cumple)
+			 //std::wcout<<"->cons"<<std::endl;
  		}
  		void rest2RLConsonante(){
  			//Si la segunda consonante es r o l, las dos consonantes se agrupan con la segunda vocal			
@@ -111,8 +136,8 @@
 						}					
 					
 				}
-		if(cumple)
-			 std::wcout<<"->LR"<<std::endl;
+		//if(cumple)
+		//	 std::wcout<<"->LR"<<std::endl;
  		}
  		void rest3Consonante(){
 			/* Cuando hay TRES consonantes ENTRE VOCALES, las primeras 
@@ -143,8 +168,8 @@
 						}
 
 
-			if(cumple)
-			 std::wcout<<"->3cons"<<std::endl;
+			//if(cumple)
+			 //std::wcout<<"->3cons"<<std::endl;
  		}
 
  		void rest4Consonante(){
@@ -162,20 +187,15 @@
 					   !this->_letras[i-2]._vocal and 
 					   !this->_letras[i-1]._vocal and 
 					    this->_letras[i]._vocal) {//vocal
-						/*printf("%c%c%c-%c%c%c-",this->_letras[i-5]._letra,
-							 					this->_letras[i-4]._letra,
-							 					this->_letras[i-3]._letra,
-							 					this->_letras[i-2]._letra,
-							 					this->_letras[i-1]._letra,
-							 					this->_letras[i]._letra);*/
+
 						this->_letras[i-5]._revisado=this->_letras[i-4]._revisado=this->_letras[i-3]._revisado=this->_letras[i-2]._revisado=this->_letras[i-1]._revisado=this->_letras[i]._revisado=true;
 						this->_letras.insert(this->_letras.begin()+i-2,Letra('-',true));
 						cumple=true;
 						
 				}
 			
-			if(cumple)
-			 std::wcout<<"->4cons"<<std::endl;
+			//if(cumple)
+			 //std::wcout<<"->4cons"<<std::endl;
  		}
  		void restDobleFusion(){//no sirve
  			/*Recuerda que las consonantes dobles: ch, ll, rr representan un solo fonema, 
@@ -200,8 +220,8 @@
 							cumple=true;							
 						}
 
-		if(cumple)
-			 std::wcout<<"->2f"<<std::endl;
+		//if(cumple)
+		//	 std::wcout<<"->2f"<<std::endl;
 					
  		}
  		//Los diptongos y los triptongos forman una sola sílaba, por lo que no podemos separarlos. 
@@ -234,8 +254,8 @@
 
 			 		}
 
-		if(cumple)
-			 std::wcout<<"->dipt"<<std::endl;
+		//if(cumple)
+		//	 std::wcout<<"->dipt"<<std::endl;
  		}
  		//triptongo
  		void restTriptongo(){ 
@@ -248,8 +268,8 @@
 						this->_letras.insert(this->_letras.begin()+i-2,Letra('-',true));
 						cumple=true;
  					}
-		if(cumple)
-			 std::wcout<<"->trip"<<std::endl;
+		//if(cumple)
+		//	 std::wcout<<"->trip"<<std::endl;
  		}
  		//hiato
  		void restHiato(){
@@ -270,8 +290,8 @@
 					this->_letras.insert(this->_letras.begin()+i,Letra('-',true));
 					cumple=true;
 				}
- 		if(cumple)
-			 std::wcout<<"->hiato"<<std::endl;
+ 		//if(cumple)
+		//	 std::wcout<<"->hiato"<<std::endl;				
  		}
 
  	//parsear la palabra a una estructura de datos adecuada
@@ -281,7 +301,7 @@
  			    	vD=wcslen(_vocalesDebiles),
  			    	lR=wcslen(_lr);
 
-	 			for(int i=0;i<size;i++){		
+	 			for(int i=0;i<size;i++){
 	 				this->_letras.push_back(Letra(_palabra[i]));
 	 				//ver si es vocal
 		 				//fuerte		 				
@@ -300,19 +320,25 @@
 			 		  //Y como débil
 			 			if(_palabra[i]==L'y')
 			 				this->_letras[i]._debil=true;
-
-			 				
+			 		  //si es h
+			 			if(_palabra[i]==L'h')
+			 				this->_letras[i]._h=true;
 		 			//ver si es lr
 			 		if(!this->_letras[i]._vocal)
 			 			for(int ii=0;ii<lR;ii++)
 			 				if( _palabra[i]==_lr[ii]){//es lr
 			 						this->_letras[i]._lr=true;
+
+			 						//this->_cumpleRest[7]=true;//cumple la restricción n7
+
 			 					break;
 			 				}
 		 			//printf("%c(%c)",this->_letras[i]._letra,(this->_letras[i]._vocal?'v':'c'));
 	 			}
 	 			this->_letras.insert(this->_letras.begin(),Letra(L' '));//un caracter comodín	 			
 	 			this->_letras[0]._nulo=true;
+
+	 			this->_noRevisados=size;
 	 			
  		}
 
@@ -330,15 +356,10 @@ public:
  			mbstowcs(this->_palabra,p, 100);
  		}
  		
- 		void init(){
- 			//iniciarlizar las vocales
- 			mbstowcs(this->_vocalesDebiles,"iuü", 10);
-			mbstowcs(this->_vocalesFuertes,"aeoáéíóú", 10);
-			mbstowcs(this->_lr,"lr", 10);
- 		}
-
 		//setear la palabra 		
- 		void setPalabra(char  *p){
+ 		void setPalabra(char  p[]){
+ 			this->_letras.clear();
+ 			this->_esMonosiliba=false;
  			mbstowcs(this->_palabra,p , 100);
  		}
 
@@ -346,41 +367,32 @@ public:
 	//función que tiene la convinación voraz para separar en sílabas  
  	//---(recorrido voraz)---
 	void separarSilabasVoraz(){
-		//parseo
+		//parseo		
 		this->parsear();
-		//restricciones
-		this->restHiato();
-		this->restMonosilabo();//si cumple la restricción se termina el programa
-		this->rest4Consonante();
-		this->restDobleFusion();
-		this->restDiptongo();	
-		this->rest3Consonante();
-		this->restTriptongo();	
-		this->rest2RLConsonante();
-		this->restConsonante();
-
-		/*
-		//1er grupo no óptimo
-		this->restConsonante();
-		this->rest2RLConsonante();
-		this->rest3Consonante();
-		this->rest4Consonante();
-		this->restDobleFusion();
-		this->restDiptongo();
-		this->restTriptongo();
-		a.respHiato();*/
-
-		//2do grupo mejor
-		/*a.respHiato();
-		this->restTriptongo();
-		this->restDiptongo();
-		this->restDobleFusion();
-		this->rest4Consonante();
-		this->rest3Consonante();
-		this->rest2RLConsonante();
-		this->restConsonante();*/		
+		//ejecutar las restricciones
+		for(int i=0;i<this->_restricciones.size();i++)
+			if(!this->_esMonosiliba)
+			  (this->*(_restricciones[i]))();
+			else
+				break;
 	}
+	//---(recorrido backtracking)---
+	void bt(std::vector<Rest> rest){
 
+		for (int i = 0; i < rest.size(); ++i)
+			{
+				(this->*(rest[i]))();
+				rest.erase(rest.begin()+i);
+				this->bt(rest);
+			}	
+			return;//backtracking
+
+	}
+	void separarSilabasBacktracking(){
+		this->parsear();
+		std::vector<Rest> rest=this->_restricciones;
+		this->bt(rest);		
+	}
 	void imprimir(){
  			wchar_t prev=L' ';
 
