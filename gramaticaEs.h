@@ -43,7 +43,7 @@
  		typedef void (Palabra::*Rest)(void) ; 	
  		std::vector<Rest> _restricciones;
  		int _noRevisados,_LRs,_DF;//contador de caracteres que podrían cumplir restricciones
- 		bool _cumpleRest[9],_esMonosiliba;//predecir si la palabra cumpliría o no la restricción
+ 		bool _esMonosiliba;//predecir si la palabra cumpliría o no la restricción
  		//grupo de instrucciones inicializadoras para el constructor
  		void init(){
  			//inicializar algunas variables
@@ -53,9 +53,9 @@
 			this->_restricciones.push_back(&Palabra::restMonosilabo);
 			this->_restricciones.push_back(&Palabra::rest4Consonante);
 			this->_restricciones.push_back(&Palabra::restDobleFusion);
-			this->_restricciones.push_back(&Palabra::restDiptongo);
 			this->_restricciones.push_back(&Palabra::rest3Consonante);
 			this->_restricciones.push_back(&Palabra::restTriptongo);
+			this->_restricciones.push_back(&Palabra::restDiptongo);			
 			this->_restricciones.push_back(&Palabra::rest2RLConsonante);
 			this->_restricciones.push_back(&Palabra::restConsonante); 	
 
@@ -63,6 +63,10 @@
  			mbstowcs(this->_vocalesDebiles,"iuü", 10);
 			mbstowcs(this->_vocalesFuertes,"aeoáéíóú", 10);
 			mbstowcs(this->_lr,"lr", 10);
+ 		}
+ 		void reset(){
+
+ 			this->_esMonosiliba=false;
  		}
  		// restricciones
  		void restMonosilabo(){ 			
@@ -88,10 +92,10 @@
 					!this->_letras[i-2]._vocal and this->_letras[i-1]._vocal and !this->_letras[i]._vocal
 				  )
 				 { 
-					//printf("-%c%c-%c ",this->_letras[i-2]._letra,this->_letras[i-1]._letra,this->_letras[i]._letra);
+					//wprintf(L"-%lc%lc-%lc ",this->_letras[i-2]._letra,this->_letras[i-1]._letra,this->_letras[i]._letra);
 					this->_letras[i-2]._revisado=this->_letras[i-1]._revisado=true;
 					this->_letras.insert(this->_letras.begin()+i-2,Letra('-',true));
-					if(i<this->_letras.size()-2)
+					if(i<this->_letras.size()-2)//no poner el signo de separación al último
 						this->_letras.insert(this->_letras.begin()+i+1,Letra('-',true));
 					cumple=true;
 				 }
@@ -99,16 +103,17 @@
 					 	!this->_letras[i-1]._revisado and !this->_letras[i]._revisado and
 						!this->_letras[i-1]._vocal and this->_letras[i]._vocal
 				 	    )
-				 {
+				 {	
+				 	//wprintf(L"-%lc%lc ",this->_letras[i-1]._letra,this->_letras[i]._letra);
 				 	//-%c%c 
 			 		this->_letras[i-1]._revisado=this->_letras[i]._revisado=true;
-					this->_letras.insert(this->_letras.begin()+i-1,Letra('-',true));
+			 		//if(!this->_letras[i-2]._nulo)
+						this->_letras.insert(this->_letras.begin()+i-1,Letra('-',true));
 					
 					cumple=true;
 
 				 }
-			//if(cumple)
-			 //std::wcout<<"->cons"<<std::endl;
+			//if(cumple) std::wcout<<"->cons"<<std::endl;
  		}
  		void rest2RLConsonante(){
  			//Si la segunda consonante es r o l, las dos consonantes se agrupan con la segunda vocal			
@@ -136,8 +141,7 @@
 						}					
 					
 				}
-		//if(cumple)
-		//	 std::wcout<<"->LR"<<std::endl;
+		//if(cumple) std::wcout<<"->LR"<<std::endl;
  		}
  		void rest3Consonante(){
 			/* Cuando hay TRES consonantes ENTRE VOCALES, las primeras 
@@ -168,8 +172,7 @@
 						}
 
 
-			//if(cumple)
-			 //std::wcout<<"->3cons"<<std::endl;
+			//if(cumple) std::wcout<<"->3cons"<<std::endl;
  		}
 
  		void rest4Consonante(){
@@ -194,8 +197,7 @@
 						
 				}
 			
-			//if(cumple)
-			 //std::wcout<<"->4cons"<<std::endl;
+			//if(cumple) std::wcout<<"->4cons"<<std::endl;
  		}
  		void restDobleFusion(){//no sirve
  			/*Recuerda que las consonantes dobles: ch, ll, rr representan un solo fonema, 
@@ -206,7 +208,7 @@
 					if(
 						!this->_letras[i-2]._revisado and !this->_letras[i-1]._revisado and !this->_letras[i]._revisado and
 						(
-							(this->_letras[i-2]._letra==L'c' and this->_letras[i-1]._letra==L'h') or
+							(this->_letras[i-2]._letra==L'c' and this->_letras[i-1]._h) or
 						    (this->_letras[i-2]._letra==L'r' and this->_letras[i-1]._letra==L'r') or 
 						    (this->_letras[i-2]._letra==L'l' and this->_letras[i-1]._letra==L'l')
 						     //this->_letras[i-2]._letra==this->_letras[i-1]._letra 
@@ -220,8 +222,7 @@
 							cumple=true;							
 						}
 
-		//if(cumple)
-		//	 std::wcout<<"->2f"<<std::endl;
+		//if(cumple) std::wcout<<"->2f"<<std::endl;
 					
  		}
  		//Los diptongos y los triptongos forman una sola sílaba, por lo que no podemos separarlos. 
@@ -239,23 +240,23 @@
 	 				{
 			 			//printf("%c%c%c-",this->_letras[i-2]._letra,this->_letras[i-1]._letra,this->_letras[i]._letra);			 			
 						this->_letras[i-1]._revisado=this->_letras[i]._revisado=true;
-						this->_letras.insert(this->_letras.begin()+i-2,Letra('-',true));
+						if(!this->_letras[i-2]._nulo)
+							this->_letras.insert(this->_letras.begin()+i-2,Letra('-',true));
 						cumple=true;
 			 		}
 			 		else if(
 				 			!this->_letras[i-3]._revisado and !this->_letras[i-2]._revisado and !this->_letras[i-1]._revisado and !this->_letras[i]._revisado and
-				 			!this->_letras[i-3]._vocal and this->_letras[i-1]._letra==L'h' and 
+				 			!this->_letras[i-3]._vocal and this->_letras[i-1]._h and 
 				 			((this->_letras[i-2]._vocal and this->_letras[i]._vocal) and !(!this->_letras[i-2]._debil and !this->_letras[i]._debil))
 			 			)
 			 		{
-			 			this->_letras[i-2]._revisado=this->_letras[i-1]._revisado=this->_letras[i]._revisado=true;
+			 			this->_letras[i-2]._revisado=this->_letras[i-1]._revisado=this->_letras[i]._revisado=true;			 			
 						this->_letras.insert(this->_letras.begin()+i+1,Letra('-',true));
 						cumple=true;
 
 			 		}
 
-		//if(cumple)
-		//	 std::wcout<<"->dipt"<<std::endl;
+		//if(cumple) std::wcout<<"->dipt"<<std::endl;
  		}
  		//triptongo
  		void restTriptongo(){ 
@@ -265,11 +266,10 @@
  					 and this->_letras[i-2]._debil and (this->_letras[i-1]._vocal and !this->_letras[i-1]._debil) and this->_letras[i]._debil){
  						//printf("%c%c%c-",this->_letras[i-2]._letra,this->_letras[i-1]._letra,this->_letras[i]._letra);
  						this->_letras[i-2]._revisado=this->_letras[i-1]._revisado=this->_letras[i]._revisado=true;
-						this->_letras.insert(this->_letras.begin()+i-2,Letra('-',true));
+						this->_letras.insert(this->_letras.begin()+i-3,Letra('-',true));
 						cumple=true;
  					}
-		//if(cumple)
-		//	 std::wcout<<"->trip"<<std::endl;
+		//if(cumple) std::wcout<<"->trip"<<std::endl;
  		}
  		//hiato
  		void restHiato(){
@@ -290,8 +290,7 @@
 					this->_letras.insert(this->_letras.begin()+i,Letra('-',true));
 					cumple=true;
 				}
- 		//if(cumple)
-		//	 std::wcout<<"->hiato"<<std::endl;				
+ 		//if(cumple) std::wcout<<"->hiato"<<std::endl;				
  		}
 
  	//parsear la palabra a una estructura de datos adecuada
@@ -377,7 +376,7 @@ public:
 				break;
 	}
 	//---(recorrido backtracking)---
-	void bt(std::vector<Rest> rest){
+	/*void bt(std::vector<Rest> rest){
 
 		for (int i = 0; i < rest.size(); ++i)
 			{
@@ -392,12 +391,15 @@ public:
 		this->parsear();
 		std::vector<Rest> rest=this->_restricciones;
 		this->bt(rest);		
-	}
+	}*/
 	void imprimir(){
- 			wchar_t prev=L' ';
+ 			wchar_t prev=L' ';	
+
+ 			if(this->_letras[1]._letra==L'-')
+ 					this->_letras.erase(this->_letras.begin()+1);
 
  			for(int i=1;i<this->_letras.size();i++){
- 				if(this->_letras[i]._letra!=prev)
+ 				if(!((prev==L'-' or this->_letras[i]._letra==L' ') and this->_letras[i]._letra==prev))
  					wprintf(L"%lc",this->_letras[i]._letra);
  				prev=this->_letras[i]._letra;
  			}			
