@@ -8,3 +8,8 @@
 <br/>-en la restricción, "restDobleFusion", mejora esta para que solo valide a conjunto de letras válidas por la gramática española: ch,ll,rr.
 <br/>Version 1.3, cambios:
 <br/>-Acepte caracteres propios del idioma español.
+<br/>Version 1.5, cambios:
+<br/>-restricción de H como una vocal que no interfiere en el diptongo.
+<br/>-arreglado el bug de repetición de guiones.
+<br/>-se agrego la restrinción de cuando la palabra contiene sl se separen en sílabas.
+
